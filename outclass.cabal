@@ -1,0 +1,23 @@
+name:           outclass
+version:        0.1
+cabal-version:  >= 1.9.2
+build-type:     Simple
+
+library
+  hs-source-dirs:  src/main
+  build-depends:   base >= 4,
+                   binary,
+                   bytestring
+  ghc-options:     -Wall
+  exposed-modules: Language.Java.Bytes
+                   Language.Java.Class,
+                   Language.Java.Constant,
+                   Language.Java.Opcode
+
+test-suite test
+  type:          exitcode-stdio-1.0
+  main-is:       src/test/Main.hs
+  build-depends: outclass,
+                 base >= 4,
+                 binary,
+                 QuickCheck
