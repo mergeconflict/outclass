@@ -9,10 +9,8 @@ library
                    binary,
                    bytestring
   ghc-options:     -Wall
-  exposed-modules: Language.Java.Bytes
-                   Language.Java.Class,
-                   Language.Java.Constant,
-                   Language.Java.Opcode
+  exposed-modules: Language.Java.Bytes,
+                   Language.Java.Constant
 
 test-suite test
   type:          exitcode-stdio-1.0
