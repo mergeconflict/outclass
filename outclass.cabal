@@ -7,9 +7,14 @@ library
   hs-source-dirs:  src/main
   build-depends:   base >= 4,
                    binary,
-                   bytestring
+                   bytestring,
+                   mtl
   ghc-options:     -Wall
-  exposed-modules: Language.Java.Bytes,
+  exposed-modules: Data.Binary.State,
+                   Data.Binary.State.Ask,
+                   Data.Binary.State.Tell,
+                   Language.Java.Attribute,
+                   Language.Java.Bytes,
                    Language.Java.Constant
 
 test-suite test
@@ -18,4 +23,6 @@ test-suite test
   build-depends: outclass,
                  base >= 4,
                  binary,
+                 bytestring,
+                 mtl,
                  QuickCheck
