@@ -1,14 +1,17 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Main
        ( main
        ) where
 
-import Data.Binary (Binary, decode, encode)
+import Language.Java.Codec.Constant
+import Language.Java.Codec (DecodeState, EncodeState, decode, encode)
+
+import Codec.Class (Decode, Encode)
 import Control.Monad (liftM, liftM2, unless)
-import Test.QuickCheck (Arbitrary, arbitrary, oneof, quickCheckResult)
+import Test.QuickCheck (Arbitrary, arbitrary, oneof, verboseCheckResult)
 import Test.QuickCheck.Test (isSuccess)
 import System.Exit (exitFailure)
-
-import Language.Java.Constant
 
 instance Arbitrary Constant where
   arbitrary = oneof
@@ -28,9 +31,9 @@ instance Arbitrary Constant where
               , liftM2 InvokeDynamic arbitrary arbitrary
               ]
 
-roundTrip :: (Binary a, Eq a) => a -> Bool
+roundTrip :: (Decode DecodeState a, Encode EncodeState a, Eq a) => a -> Bool
 roundTrip b = (decode $ encode b) == b
 
 main = do
-  result <- quickCheckResult (roundTrip :: Constant -> Bool)
+  result <- verboseCheckResult (roundTrip :: Constant -> Bool)
   unless (isSuccess result) exitFailure

@@ -10,12 +10,13 @@ library
                    bytestring,
                    mtl
   ghc-options:     -Wall
-  exposed-modules: Data.Binary.State,
-                   Data.Binary.State.Ask,
-                   Data.Binary.State.Tell,
-                   Language.Java.Attribute,
+  exposed-modules: Codec.Class,
+                   Codec.Decoder,
+                   Codec.Encoder,
                    Language.Java.Bytes,
-                   Language.Java.Constant
+                   Language.Java.Codec,
+                   Language.Java.Codec.Utf8,
+                   Language.Java.Codec.Constant
 
 test-suite test
   type:          exitcode-stdio-1.0
