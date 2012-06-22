@@ -1,9 +1,8 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Main
        ( main
        ) where
 
+{-
 import Language.Java.Codec.Constant
 import Language.Java.Codec (DecodeState, EncodeState, decode, encode)
 
@@ -37,3 +36,6 @@ roundTrip b = (decode $ encode b) == b
 main = do
   result <- verboseCheckResult (roundTrip :: Constant -> Bool)
   unless (isSuccess result) exitFailure
+-}
+
+main = undefined

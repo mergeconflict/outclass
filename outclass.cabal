@@ -8,15 +8,16 @@ library
   build-depends:   base >= 4,
                    binary,
                    bytestring,
+                   containers,
                    mtl
   ghc-options:     -Wall
-  exposed-modules: Codec.Class,
-                   Codec.Decoder,
-                   Codec.Encoder,
-                   Language.Java.Bytes,
-                   Language.Java.Codec,
-                   Language.Java.Codec.Utf8,
-                   Language.Java.Codec.Constant
+  exposed-modules: Language.Java.Codec,
+                   Language.Java.Codec.Constants.Utf8,
+                   Language.Java.Codec.Decoder,
+                   Language.Java.Codec.Encoder,
+                   Language.Java.Codec.Refs,
+                   Language.Java.Constants,
+                   Language.Java.Primitives
 
 test-suite test
   type:          exitcode-stdio-1.0

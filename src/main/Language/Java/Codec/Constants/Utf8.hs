@@ -1,19 +1,17 @@
-module Language.Java.Codec.Utf8
+module Language.Java.Codec.Constants.Utf8
        ( encodeString
        , decodeString
        ) where
 
-import Language.Java.Bytes
+import           Data.Bits
+import qualified Data.ByteString as Strict
+import           Data.Char
+import           Data.Word
 
-import           Data.Bits ((.|.), (.&.), shiftL, shiftR)
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString as B (concat, pack, unpack)
-import           Data.Char (chr, ord)
-
-encodeString :: String -> ByteString
-encodeString = B.concat . map (B.pack . encodeChar)
+encodeString :: String -> Strict.ByteString
+encodeString = Strict.concat . map (Strict.pack . encodeChar)
   where
-    encodeChar :: Char -> [U1]
+    encodeChar :: Char -> [Word8]
     encodeChar = map fromIntegral . encode . ord
 
     encode :: Int -> [Int]
@@ -32,8 +30,8 @@ encodeString = B.concat . map (B.pack . encodeChar)
                        b `shiftR` 6 .&. 0x0F .|. 0xB0,
                        b .&. 0x3F .|. 0x80]
 
-decodeString :: ByteString -> Maybe String
-decodeString = fmap reverse . decode "" . map fromIntegral . B.unpack
+decodeString :: Strict.ByteString -> Maybe String
+decodeString = fmap reverse . decode "" . map fromIntegral . Strict.unpack
   where
     decode :: String -> [Int] -> Maybe String
     decode s (0xED : v : w : 0xED : y : z : bs)
