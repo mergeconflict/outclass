@@ -6,15 +6,20 @@ module Language.Java.Codec.Encoder
 
 import           Language.Java.Codec.Refs
 
-import           Control.Monad.Reader
-import           Data.Binary.Put
+import           Control.Monad.RWS
+import           Control.Monad.Writer
+import           Data.Binary.Builder
 import qualified Data.ByteString as Strict
 import qualified Data.ByteString.Lazy as Lazy
 
-type Encoder = ReaderT Refs PutM ()
+data EncState = EncState
+type Encoder = RWST Refs Refs EncState (Writer Builder) ()
 
-runEncoder :: (Encoder, Refs) -> Lazy.ByteString
-runEncoder (r, refs) = runPut (runReaderT r refs)
+runEncoder :: Encoder -> Lazy.ByteString
+runEncoder m =
+  let knot ~(_, _, r) = runRWST m r EncState
+      (_, w) = runWriter (mfix knot)
+  in toLazyByteString w
 
 byteStringEncoder :: Strict.ByteString -> Encoder
-byteStringEncoder = lift . putByteString
+byteStringEncoder = lift . tell . fromByteString

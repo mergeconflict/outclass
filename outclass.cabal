@@ -9,7 +9,8 @@ library
                    binary,
                    bytestring,
                    containers,
-                   mtl
+                   mtl,
+                   unordered-containers
   ghc-options:     -Wall
   exposed-modules: Language.Java.Codec,
                    Language.Java.Codec.Constants.Utf8,
