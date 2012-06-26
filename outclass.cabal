@@ -9,6 +9,7 @@ library
                    binary,
                    bytestring,
                    containers,
+                   hashable,
                    mtl,
                    unordered-containers
   ghc-options:     -Wall
@@ -16,7 +17,6 @@ library
                    Language.Java.Codec.Constants.Utf8,
                    Language.Java.Codec.Decoder,
                    Language.Java.Codec.Encoder,
-                   Language.Java.Codec.Refs,
                    Language.Java.Constants,
                    Language.Java.Primitives
 
