@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveDataTypeable, GeneralizedNewtypeDeriving #-}
 
 module Language.Java.Constants
        ( ClassC (..)
@@ -20,18 +20,19 @@ module Language.Java.Constants
 
 import Data.Hashable
 import Data.Int
+import Data.Typeable
 
-newtype ClassC           = Class            Utf8C                deriving (Eq, Hashable)
-data    FieldC           = Field            ClassC  NameAndTypeC deriving Eq
-data    MethodC          = Method           ClassC  NameAndTypeC deriving Eq
-data    InterfaceMethodC = InterfaceMethod  ClassC  NameAndTypeC deriving Eq
-newtype StringC          = String           Utf8C                deriving (Eq, Hashable)
-newtype IntegerC         = Integer          Int32                deriving (Eq, Hashable)
-newtype FloatC           = Float            Float                deriving (Eq, Hashable)
-newtype LongC            = Long             Int64                deriving (Eq, Hashable)
-newtype DoubleC          = Double           Double               deriving (Eq, Hashable)
-data    NameAndTypeC     = NameAndType      Utf8C   Utf8C        deriving Eq
-newtype Utf8C            = Utf8             String               deriving (Eq, Hashable)
+newtype ClassC           = Class            Utf8C                deriving (Eq, Hashable, Typeable)
+data    FieldC           = Field            ClassC  NameAndTypeC deriving (Eq, Typeable)
+data    MethodC          = Method           ClassC  NameAndTypeC deriving (Eq, Typeable)
+data    InterfaceMethodC = InterfaceMethod  ClassC  NameAndTypeC deriving (Eq, Typeable)
+newtype StringC          = String           Utf8C                deriving (Eq, Hashable, Typeable)
+newtype IntegerC         = Integer          Int32                deriving (Eq, Hashable, Typeable)
+newtype FloatC           = Float            Float                deriving (Eq, Hashable, Typeable)
+newtype LongC            = Long             Int64                deriving (Eq, Hashable, Typeable)
+newtype DoubleC          = Double           Double               deriving (Eq, Hashable, Typeable)
+data    NameAndTypeC     = NameAndType      Utf8C   Utf8C        deriving (Eq, Typeable)
+newtype Utf8C            = Utf8             String               deriving (Eq, Hashable, Typeable)
 data    MethodHandleC    = GetField         FieldC  |
                            GetStatic        FieldC  |
                            PutField         FieldC  |
@@ -40,9 +41,9 @@ data    MethodHandleC    = GetField         FieldC  |
                            InvokeStatic     MethodC |
                            InvokeSpecial    MethodC |
                            NewInvokeSpecial MethodC |
-                           InvokeInterface  InterfaceMethodC     deriving Eq
-newtype MethodTypeC      = MethodType       Utf8C                deriving (Eq, Hashable)
-data InvokeDynamicC      = InvokeDynamic    ()      NameAndTypeC deriving Eq
+                           InvokeInterface  InterfaceMethodC     deriving (Eq, Typeable)
+newtype MethodTypeC      = MethodType       Utf8C                deriving (Eq, Hashable, Typeable)
+data InvokeDynamicC      = InvokeDynamic    ()      NameAndTypeC deriving (Eq, Typeable)
   -- TODO () == BootstrapMethod
 
 data Constant =
@@ -60,7 +61,7 @@ data Constant =
   MethodHandleConstant    MethodHandleC    |
   MethodTypeConstant      MethodTypeC      |
   InvokeDynamicConstant   InvokeDynamicC
-  deriving Eq
+  deriving (Eq, Typeable)
 
 hash2 :: (Hashable a, Hashable b) => a -> b -> Int
 hash2 a b = (hash a) `combine` (hash b)
