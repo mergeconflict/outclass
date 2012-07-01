@@ -1,42 +1,61 @@
-{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, Rank2Types #-}
 
 module Language.Java.Codec.Encoder
-       ( Encoder
+       ( State (..)
+       , Encoder
        , runEncoder
+       , binaryEncoder
        , byteStringEncoder
-       , ERefs (..)
+       , Refs (..)
        ) where
 
 import           Language.Java.Codec.Bytes
 
+import           Control.Applicative
 import           Control.Monad.RWS
-import           Control.Monad.Writer
-import           Data.Binary.Builder
+import           Data.Binary (Binary)
+import qualified Data.Binary as Binary
+import           Data.Binary.Put
 import qualified Data.ByteString as Strict
 import qualified Data.ByteString.Lazy as Lazy
 import           Data.HashMap.Lazy
 import           Data.Typeable
 
-data EncState = EncState
-type Encoder = RWST ERefs ERefs EncState (Writer Builder) ()
+newtype FixPutM a = Fix { unFix :: PutM a }
+  deriving (Applicative, Functor, Monad)
 
-runEncoder :: Encoder -> Lazy.ByteString
-runEncoder m =
-  let knot ~(_, _, r) = runRWST m r EncState
-      (_, w) = runWriter (mfix knot)
-  in toLazyByteString w
+runFixPutM :: FixPutM a -> (a, Lazy.ByteString)
+runFixPutM = runPutM . unFix
+
+instance MonadFix FixPutM where
+  mfix f =
+    let (a, b) = runFixPutM . f $ a
+    in Fix $ putLazyByteString b >> return a
+
+data State =
+  ConstantState U2
+type Encoder = RWST Refs Refs State FixPutM ()
+
+runEncoder :: Encoder -> State -> Lazy.ByteString
+runEncoder m s =
+  let knot ~(_, _, r) = runRWST m r s
+      (_, b) = runFixPutM $ mfix knot
+  in b
+
+binaryEncoder :: Binary a => a -> Encoder
+binaryEncoder = lift . Fix . Binary.put
 
 byteStringEncoder :: Strict.ByteString -> Encoder
-byteStringEncoder = lift . tell . fromByteString
+byteStringEncoder = lift . Fix . putByteString
 
-data ERefs = ERefs {
+data Refs = Refs {
   constants :: Typeable a => HashMap TypeRep (HashMap a U2)
 }
 
-instance Monoid ERefs where
-  mempty = ERefs {
+instance Monoid Refs where
+  mempty = Refs {
     constants = mempty
   }
-  mappend a b = ERefs {
+  mappend a b = Refs {
     constants = mappend (constants a) (constants b)
   }

@@ -9,15 +9,13 @@ module Language.Java.Codec
 import           Language.Java.Constants
 import           Language.Java.Codec.Bytes
 import           Language.Java.Codec.Constants.Utf8
-import           Language.Java.Codec.Decoder (Decoder, DRefs, byteStringDecoder, runDecoder)
-import qualified Language.Java.Codec.Decoder as D
-import           Language.Java.Codec.Encoder (Encoder, ERefs, byteStringEncoder, runEncoder)
-import qualified Language.Java.Codec.Encoder as E
+import qualified Language.Java.Codec.Decoder as D (State, Refs (..))
+import           Language.Java.Codec.Decoder
+import qualified Language.Java.Codec.Encoder as E (State, Refs (..))
+import           Language.Java.Codec.Encoder
 
 import           Control.Applicative
 import           Control.Monad.RWS
-import qualified Data.Binary as Binary
-import           Data.Binary.Builder as Builder
 import           Data.ByteString.Lazy
 import           Data.Hashable
 import           Data.HashMap.Lazy (HashMap)
@@ -31,51 +29,28 @@ class Codec a where
   dec :: Decoder a
   enc :: a -> Encoder
 
-decode :: Codec a => ByteString -> a
-decode = runDecoder dec
+decode :: Codec a => D.State -> ByteString -> a
+decode s b = runDecoder dec s b
 
-encode :: Codec a => a -> ByteString
-encode = runEncoder . enc
+encode :: Codec a => E.State -> a -> ByteString
+encode s b = runEncoder (enc b) s
 
-{- Misc -}
+{- Binary -}
 
-instance Codec U1 where
-  dec = lift Binary.get
-  enc = lift . tell . Builder.singleton
-
-instance Codec U2 where
-  dec = lift Binary.get
-  enc = lift . tell . Builder.putWord16be
-
-instance Codec U4 where
-  dec = lift Binary.get
-  enc = lift . tell . Builder.putWord32be
-
-instance Codec U8 where
-  dec = lift Binary.get
-  enc = lift . tell . Builder.putWord64be
-
-instance Codec Int32 where
-  dec = lift Binary.get
-  enc a = enc (fromIntegral a :: U4)
-
-instance Codec Float where
-  dec = lift Binary.get
-  enc = undefined -- TODO
-
-instance Codec Int64 where
-  dec = lift Binary.get
-  enc a = enc (fromIntegral a :: U8)
-
-instance Codec Double where
-  dec = lift Binary.get
-  enc = undefined -- TODO
+instance Codec U1     where dec = binaryDecoder; enc = binaryEncoder
+instance Codec U2     where dec = binaryDecoder; enc = binaryEncoder
+instance Codec U4     where dec = binaryDecoder; enc = binaryEncoder
+instance Codec U8     where dec = binaryDecoder; enc = binaryEncoder
+instance Codec Int32  where dec = binaryDecoder; enc = binaryEncoder
+instance Codec Float  where dec = binaryDecoder; enc = binaryEncoder
+instance Codec Int64  where dec = binaryDecoder; enc = binaryEncoder
+instance Codec Double where dec = binaryDecoder; enc = binaryEncoder
 
 {- References -}
 
 -- TODO don't use (!) for map search, use lookup and fail in the appropriate monad
 
-decU2Ref :: Typeable a => (DRefs -> HashMap TypeRep (IntMap a)) -> Decoder a
+decU2Ref :: Typeable a => (D.Refs -> HashMap TypeRep (IntMap a)) -> Decoder a
 decU2Ref f = do
   ref <- fromIntegral <$> (dec :: Decoder U2)
   tm  <- f <$> ask
@@ -84,7 +59,7 @@ decU2Ref f = do
       a = m IntMap.! ref
   return a
 
-encU2Ref :: (Eq a, Hashable a, Typeable a) => (ERefs -> HashMap TypeRep (HashMap a U2)) -> a -> Encoder
+encU2Ref :: (Eq a, Hashable a, Typeable a) => (E.Refs -> HashMap TypeRep (HashMap a U2)) -> a -> Encoder
 encU2Ref f a = do
   tm <- f <$> ask
   let t   = typeOf a
