@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Language.Java.Codec.Bytes
        ( U1
        , U2
@@ -5,10 +6,9 @@ module Language.Java.Codec.Bytes
        , U8
        ) where
 
-import Data.Word
+import Data.Binary
 
-type U1 = Word8
-type U2 = Word16
-type U4 = Word32
-type U8 = Word64
-
+newtype U1 = U1 Word8  deriving (Binary, Enum, Eq, Integral, Num, Ord, Real)
+newtype U2 = U2 Word16 deriving (Binary, Enum, Eq, Integral, Num, Ord, Real)
+newtype U4 = U4 Word32 deriving (Binary, Enum, Eq, Integral, Num, Ord, Real)
+newtype U8 = U8 Word64 deriving (Binary, Enum, Eq, Integral, Num, Ord, Real)
