@@ -38,4 +38,12 @@ main = do
   unless (isSuccess result) exitFailure
 -}
 
-main = undefined
+import Language.Java.Codec.Class
+
+import Data.Binary
+import System.Environment
+
+main = do
+  filename <- fmap head getArgs
+  clazz    <- decodeFile filename :: IO Class
+  putStrLn $ show clazz

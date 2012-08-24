@@ -212,10 +212,11 @@ data Opcode =
   BREAKPOINT      |
   IMPDEP1         |
   IMPDEP2
+  deriving Show
 
 instance Binary Opcode where
   get = do
-    opcode <- get :: Get U1
+    opcode <- getTag
     case opcode of
       0   -> return NOP
       1   -> return ACONST_NULL
@@ -425,7 +426,7 @@ instance Binary Opcode where
       _   -> fail "invalid opcode"
 
   put opcode =
-    (put :: U1 -> Put) $ case opcode of
+    putTag $ case opcode of
       NOP             -> 0
       ACONST_NULL     -> 1
       ICONST_M1       -> 2

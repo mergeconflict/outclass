@@ -7,12 +7,12 @@ library
   hs-source-dirs:  src/main
   build-depends:   base >= 4,
                    binary,
-                   bytestring
+                   bytestring,
+                   vector
   ghc-options:     -Wall
   exposed-modules: Language.Java.Codec.Bytes,
                    Language.Java.Codec.Class,
                    Language.Java.Codec.Constants,
-                   Language.Java.Codec.Constants.Utf8,
                    Language.Java.Codec.Opcodes
 
 test-suite test
