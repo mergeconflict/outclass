@@ -1,8 +1,8 @@
-module Language.Java.Codec.Opcodes
+module Language.Java.Binary.Opcodes
        ( Opcode (..)
        ) where
 
-import Language.Java.Codec.Bytes
+import Language.Java.Binary.Bytes
 
 import Data.Binary
 

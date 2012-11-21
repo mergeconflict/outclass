@@ -1,13 +1,13 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Language.Java.Codec.Class
+module Language.Java.Binary.Class
 	     ( Class (..)
        , Field (..)
        , Method (..)
 	     ) where
 
-import Language.Java.Codec.Bytes
-import Language.Java.Codec.Constants
+import Language.Java.Binary.Bytes
+import Language.Java.Binary.Constants
 
 import           Control.Applicative
 import           Data.Binary

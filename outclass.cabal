@@ -10,17 +10,20 @@ library
                    bytestring,
                    vector
   ghc-options:     -Wall
-  exposed-modules: Language.Java.Codec.Bytes,
-                   Language.Java.Codec.Class,
-                   Language.Java.Codec.Constants,
-                   Language.Java.Codec.Opcodes
+  exposed-modules: Language.Java.Binary.Constant,
+                   Language.Java.Binary.Primitive,
+                   Language.Java.Binary.Word
 
 test-suite test
-  type:          exitcode-stdio-1.0
-  main-is:       src/test/Main.hs
-  build-depends: outclass,
-                 base >= 4,
-                 binary,
-                 bytestring,
-                 mtl,
-                 QuickCheck
+  hs-source-dirs:  src/test
+  type:            exitcode-stdio-1.0
+  main-is:         Main.hs
+  build-depends:   base >= 4,
+                   binary,
+                   bytestring,
+                   outclass,
+                   test-framework,
+                   test-framework-quickcheck2,
+                   vector,
+                   Cabal,
+                   QuickCheck
