@@ -10,7 +10,8 @@ library
                    bytestring,
                    vector
   ghc-options:     -Wall
-  exposed-modules: Language.Java.Binary.Constant,
+  exposed-modules: Language.Java.Binary.Class,
+                   Language.Java.Binary.Constant,
                    Language.Java.Binary.Primitive,
                    Language.Java.Binary.Word
 

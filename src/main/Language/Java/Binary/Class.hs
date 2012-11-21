@@ -1,92 +1,108 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, NamedFieldPuns #-}
 
 module Language.Java.Binary.Class
-	     ( Class (..)
-       , Field (..)
-       , Method (..)
+	     ( Attribute (..)
+       , Class (..)
+       , Flags (..)
+       , Member (..)
+       , Version (..)
 	     ) where
 
-import Language.Java.Binary.Bytes
-import Language.Java.Binary.Constants
+import Language.Java.Binary.Constant
+import Language.Java.Binary.Word
 
 import           Control.Applicative
 import           Data.Binary
 import           Data.Binary.Get
 import           Data.Binary.Put
-import qualified Data.ByteString as Strict
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString as ByteString
+import           Data.Vector (Vector)
+import qualified Data.Vector as Vector
 
 {- version -}
 
-data Version = Version U2 U2 deriving Show
+data Version = Version { minorVersion :: U2, majorVersion :: U2 } deriving (Eq, Show)
 
 instance Binary Version where
-  get = get2 Version
-  put (Version minor major) = put2 minor major
+  get = Version <$> get <*> get
+  put (Version minorVersion majorVersion) =
+    put minorVersion >> put majorVersion
 
 {- flags -}
 
-newtype Flags = Flags U2 deriving (Binary, Show)
+newtype Flags = Flags U2 deriving (Binary, Eq, Show)
 
 {- attribute -}
 
-data Attribute = Attribute U2 Strict.ByteString deriving Show
+data Attribute = Attribute { attributeNameIndex :: U2, attributeInfo :: ByteString } deriving (Eq, Show)
 
 instance Binary Attribute where
   get = do
-    ref  <- get
-    len  <- get :: Get U4
-    info <- getByteString $ fromIntegral len
-    return $ Attribute ref info
-  put (Attribute ref info) = do
-    put ref
-    put $ Strict.length info
-    putByteString info
+    nameIndex       <- get
+    attributeLength <- get :: Get U4
+    attributeInfo   <- getByteString $ fromIntegral attributeLength
+    return $ Attribute nameIndex attributeInfo
+  put (Attribute nameIndex attributeInfo) =
+    put nameIndex >> put (fromIntegral $ ByteString.length attributeInfo :: U4) >> putByteString attributeInfo
 
-{- field / method -}
+{- member -}
 
-data Field = Field Flags U2 U2 [Attribute] deriving Show
+data Member = Member { memberFlags :: Flags, memberNameIndex :: U2, descriptorIndex :: U2, memberAttributes :: Vector Attribute } deriving (Eq, Show)
 
-instance Binary Field where
-  get = getFieldOrMethod Field
-  put (Field flags nameRef descriptorRef attributes) =
-    putFieldOrMethod flags nameRef descriptorRef attributes
-
-data Method = Method Flags U2 U2 [Attribute] deriving Show
-
-instance Binary Method where
-  get = getFieldOrMethod Method
-  put (Method flags nameRef descriptorRef attributes) =
-    putFieldOrMethod flags nameRef descriptorRef attributes
-
-getFieldOrMethod :: (Flags -> U2 -> U2 -> [Attribute] -> a) -> Get a
-getFieldOrMethod f =
-  f <$> get <*> get <*> get <*> getList
-
-putFieldOrMethod :: Flags -> U2 -> U2 -> [Attribute] -> Put
-putFieldOrMethod flags nameRef descriptorRef attributes = do
-  put flags
-  put nameRef
-  put descriptorRef
-  putList attributes
+instance Binary Member where
+  get = Member <$> get <*> get <*> get <*> getVector
+  put (Member flags nameIndex descriptorIndex attributes) =
+    put flags >> put nameIndex >> put descriptorIndex >> putVector attributes
 
 {- class -}
 
-data Class = Class Version Constants Flags U2 U2 [U2] [Field] [Method] [Attribute] deriving Show
+data Class = Class
+  { version :: Version
+  , constants :: Vector Constant
+  , classFlags :: Flags
+  , thisClass :: U2
+  , superClass :: U2
+  , interfaces :: Vector U2
+  , fields :: Vector Member
+  , methods :: Vector Member
+  , classAttributes :: Vector Attribute
+  } deriving (Eq, Show)
 
 instance Binary Class where
   get = do
     magic <- get :: Get U4
     if magic /= 0xCAFEBABE
       then fail "invalid magic"
-      else Class <$> get <*> get <*> get <*> get <*> get <*> getList <*> getList <*> getList <*> getList
+      else Class <$> get <*> getVector1 <*> get <*> get <*> get <*> getVector <*> getVector <*> getVector <*> getVector
   put (Class version constants flags this super interfaces fields methods attributes) = do
     put (0xCAFEBABE :: U4)
     put version
-    put constants
+    putVector1 constants
     put flags
     put this
     put super
-    putList interfaces
-    putList fields
-    putList methods
-    putList attributes
+    putVector interfaces
+    putVector fields
+    putVector methods
+    putVector attributes
+
+{- helpers -}
+
+getVector :: Binary a => Get (Vector a)
+getVector = do
+  len <- get :: Get U2
+  Vector.replicateM (fromIntegral len) get
+
+putVector :: Binary a => Vector a -> Put
+putVector v =
+  put (fromIntegral $ Vector.length v :: U2) >> Vector.mapM_ put v
+
+getVector1 :: Binary a => Get (Vector a)
+getVector1 = do
+  len <- get :: Get U2
+  Vector.replicateM (fromIntegral $ len - 1) get
+
+putVector1 :: Binary a => Vector a -> Put
+putVector1 v =
+  put (fromIntegral $ Vector.length v + 1 :: U2) >> Vector.mapM_ put v

@@ -104,17 +104,31 @@ instance Binary Constant where
       18 -> InvokeDynamicConstant <$> get <*> get
       _  -> fail "invalid Constant"
 
-  put (ClassConstant nameIndex) = put (7 :: U1) >> put nameIndex
-  put (FieldConstant classIndex nameAndTypeIndex) = put (9 :: U1) >> put classIndex >> put nameAndTypeIndex
-  put (MethodConstant classIndex nameAndTypeIndex) = put (10 :: U1) >> put classIndex >> put nameAndTypeIndex
-  put (InterfaceMethodConstant classIndex nameAndTypeIndex) = put (11 :: U1) >> put classIndex >> put nameAndTypeIndex
-  put (StringConstant utf8Index) = put (8 :: U1) >> put utf8Index
-  put (IntegerConstant integerValue) = put (3 :: U1) >> put integerValue
-  put (FloatConstant floatValue) = put (4 :: U1) >> put floatValue
-  put (LongConstant longValue) = put (5 :: U1) >> put longValue
-  put (DoubleConstant doubleValue) = put (6 :: U1) >> put doubleValue
-  put (NameAndTypeConstant nameIndex descriptorIndex) = put (12 :: U1) >> put nameIndex >> put descriptorIndex
-  put (Utf8Constant utf8Value) = put (1 :: U1) >> put utf8Value
-  put (MethodHandleConstant referenceKind referenceIndex) = put (15 :: U1) >> put referenceKind >> put referenceIndex
-  put (MethodTypeConstant descriptorIndex) = put (16 :: U1) >> put descriptorIndex
-  put (InvokeDynamicConstant bootstrapMethodAttrIndex nameAndTypeIndex) = put (18 :: U1) >> put bootstrapMethodAttrIndex >> put nameAndTypeIndex
+  put (ClassConstant nameIndex) =
+    put (7 :: U1) >> put nameIndex
+  put (FieldConstant classIndex nameAndTypeIndex) =
+    put (9 :: U1) >> put classIndex >> put nameAndTypeIndex
+  put (MethodConstant classIndex nameAndTypeIndex) =
+    put (10 :: U1) >> put classIndex >> put nameAndTypeIndex
+  put (InterfaceMethodConstant classIndex nameAndTypeIndex) =
+    put (11 :: U1) >> put classIndex >> put nameAndTypeIndex
+  put (StringConstant utf8Index) =
+    put (8 :: U1) >> put utf8Index
+  put (IntegerConstant integerValue) =
+    put (3 :: U1) >> put integerValue
+  put (FloatConstant floatValue) =
+    put (4 :: U1) >> put floatValue
+  put (LongConstant longValue) =
+    put (5 :: U1) >> put longValue
+  put (DoubleConstant doubleValue) =
+    put (6 :: U1) >> put doubleValue
+  put (NameAndTypeConstant nameIndex descriptorIndex) =
+    put (12 :: U1) >> put nameIndex >> put descriptorIndex
+  put (Utf8Constant utf8Value) =
+    put (1 :: U1) >> put utf8Value
+  put (MethodHandleConstant referenceKind referenceIndex) =
+    put (15 :: U1) >> put referenceKind >> put referenceIndex
+  put (MethodTypeConstant descriptorIndex) =
+    put (16 :: U1) >> put descriptorIndex
+  put (InvokeDynamicConstant bootstrapMethodAttrIndex nameAndTypeIndex) =
+    put (18 :: U1) >> put bootstrapMethodAttrIndex >> put nameAndTypeIndex
